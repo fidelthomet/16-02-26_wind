@@ -85,13 +85,59 @@ function setup() {
 			pop()
 		}
 	}
+
+	svg()
 }
 
 
-function button(){
-	document.querySelector("button").addEventListener("click", function(){
-		saveCanvas(c, 'wind-'+(new Date().getTime()), config.output);
+function svg() {
+	var chart = d3.select("body")
+		.append("svg")
+		.attr("width", config.canvas.width)
+		.attr("height", config.canvas.height)
+
+
+	for (var x1 = 0; x1 < width / config.sampleSize; x1++) {
+		for (var y1 = 0; y1 < height / config.sampleSize; y1++) {
+			var size = map(arrRed[x1 + y1 * (width / config.sampleSize)], 255, 0, config.width.min, config.width.max)
+			var filly = map(arrRed[x1 + y1 * (width / config.sampleSize)], 0, 255, 1-config.opacity.min/255, 1-config.opacity.max/255)
+			var deg = map(arrGreen[x1 + y1 * (width / config.sampleSize)], 0, 255, config.orientation.min, config.orientation.max)
+
+			chart.append("g")
+				.attr('transform', 'translate(' + (x1 * config.sampleSize + config.sampleSize / 2) + ',' + (y1 * config.sampleSize + config.sampleSize / 2) + ') rotate('+deg+')')
+				.append('rect')
+				.attr('x', -(size / 2))
+				.attr('y', -(config.height / 2))
+				.attr('width', size)
+				.attr('height', config.height)
+				.attr("fill", "rgba(0,0,0,"+filly+")")
+
+				
+
+		}
+	}
+}
+
+function button() {
+	document.querySelector("#b1").addEventListener("click", function() {
+		saveCanvas(c, 'wind-' + (new Date().getTime()), config.output);
 	})
+	document.querySelector("#b2").addEventListener("click", function() {
+		download('wind-' + (new Date().getTime())+'.svg', document.querySelector("svg").outerHTML)
+	})
+}
+
+function download(filename, text) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
 }
 
 if (document.readyState != 'loading') {
